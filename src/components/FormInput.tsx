@@ -23,13 +23,20 @@ const FormInput = <T extends Record<string, any>>(props: FormInputTypes<T>) => {
 
   return (
     <div>
-      {props.label && <Label htmlFor={props.name}>{props.label}</Label>}
+      {props.label && (
+        <Label htmlFor={props.name}>
+          {props.label}
+          {props.required && <span className="text-red-500">*</span>}
+        </Label>
+      )}
 
       <InputComponent
         id={props.name}
+        type={props.type}
         className="mt-1"
         placeholder={props.placeholder}
         disabled={props.disabled}
+        required={props.required}
         {...register(props.name)}
       />
 

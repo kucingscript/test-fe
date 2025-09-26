@@ -29,7 +29,8 @@ export const registerSchema = yup.object({
   nickname: yup
     .string()
     .min(3, "Nickname must be at least 3 characters")
-    .max(20, "Nickname is too long"),
+    .max(20, "Nickname is too long")
+    .required("Nickname is required"),
   fullname: yup
     .string()
     .min(3, "Fullname must be at least 3 characters")
