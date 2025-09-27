@@ -1,10 +1,10 @@
+import { Toaster } from "@/components/ui/sonner";
 import {
   ErrorComponent,
   Outlet,
   createRootRoute,
 } from "@tanstack/react-router";
-import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
-import { TanstackDevtools } from "@tanstack/react-devtools";
+import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 
 export const Route = createRootRoute({
   pendingComponent: () => <div>Loading...</div>,
@@ -14,18 +14,9 @@ export const Route = createRootRoute({
   component: () => (
     <>
       <Outlet />
+      <Toaster />
       {import.meta.env.VITE_ENV === "dev" && (
-        <TanstackDevtools
-          config={{
-            position: "bottom-left",
-          }}
-          plugins={[
-            {
-              name: "Tanstack Router",
-              render: <TanStackRouterDevtoolsPanel />,
-            },
-          ]}
-        />
+        <TanStackRouterDevtools initialIsOpen={false} />
       )}
     </>
   ),

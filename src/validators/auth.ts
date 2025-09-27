@@ -49,10 +49,6 @@ export const registerSchema = yup.object({
     .string()
     .max(100, "Corporate address is too long")
     .required("Corporate address is required"),
-  corporate_type_id: yup
-    .string()
-    .max(50, "Corporate type is too long")
-    .required("Corporate type is required"),
 });
 
 export type RegisterSchema = yup.InferType<typeof registerSchema>;

@@ -12,6 +12,7 @@ import { useAuthStore } from "@/store/auth";
 import FormInput from "@/components/FormInput";
 import { Loader2 } from "lucide-react";
 import { loginUser } from "@/services/authService";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_auth/login")({
   validateSearch: (search) => {
@@ -46,6 +47,7 @@ function LoginComponent() {
     try {
       const res = await loginUser(data);
       if (res && res.code === 0) {
+        toast.success("Login successful!");
         login(res.data);
         navigate({
           to: redirect || "/admin",

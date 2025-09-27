@@ -6,6 +6,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Loader2 } from "lucide-react";
 import { FormProvider, useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_auth/register")({
   component: RegisterComponent,
@@ -27,6 +28,7 @@ function RegisterComponent() {
     try {
       const res = await registerUser({ ...data, corporate_type_id: "2" });
       if (res && res.code === 0) {
+        toast.success("Registration successful! Please log in.");
         navigate({
           to: "/login",
           search: { redirect: undefined },
