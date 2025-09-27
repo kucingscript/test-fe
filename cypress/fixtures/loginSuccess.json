@@ -1,0 +1,14 @@
+{
+  "code": 0,
+  "request_id": "mock-request-id",
+  "message": "Login successful",
+  "data": {
+    "user_id": "123",
+    "nickname": "TestUser",
+    "fullname": "Test User Fullname",
+    "email": "test@example.com",
+    "user_type": "CLIENT",
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjQxMDI0NDQ4MDB9.dummy-signature-for-testing",
+    "corporates": []
+  }
+}
