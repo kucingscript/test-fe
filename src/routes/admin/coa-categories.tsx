@@ -22,62 +22,55 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { useDataTable } from "@/hooks/use-data-table";
-import Loader from "@/components/Loader";
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
+import { PlusCircle, Search } from "lucide-react";
+import { DataTablePagination } from "@/components/pagination";
+import { TableSkeleton } from "@/components/TableSkeleton";
 
 export const Route = createFileRoute("/admin/coa-categories")({
   validateSearch: (search: Record<string, unknown>) => ({
     page: Number(search.page ?? 1),
+    limit: Number(search.limit ?? 10),
   }),
   component: RouteComponent,
 });
 
 const columns: ColumnDef<CategoryCOA>[] = [
-  {
-    accessorKey: "category_id",
-    header: "ID Kategori",
-  },
-  {
-    accessorKey: "name",
-    header: "Nama",
-  },
-  {
-    accessorKey: "account_type",
-    header: "Tipe Akun",
-  },
-  {
-    accessorKey: "normal_balance",
-    header: "Saldo Normal",
-  },
-  {
-    accessorKey: "report_position",
-    header: "Posisi Laporan",
-  },
+  { accessorKey: "category_id", header: "ID Kategori" },
+  { accessorKey: "name", header: "Nama" },
+  { accessorKey: "account_type", header: "Tipe Akun" },
+  { accessorKey: "normal_balance", header: "Saldo Normal" },
+  { accessorKey: "report_position", header: "Posisi Laporan" },
 ];
 
 function RouteComponent() {
   const navigate = useNavigate({ from: Route.fullPath });
-  const { page: initialPage } = useSearch({ from: Route.fullPath });
+  const { page: initialPage, limit: initialLimit } = useSearch({
+    from: Route.fullPath,
+  });
 
   const {
     data,
     pageInfo,
     loading,
-    error,
+    isFetching,
     page,
     setPage,
+    limit,
     searchTerm,
     setSearchTerm,
-  } = useDataTable(
-    getCategoryCOA,
-    "coa-categories",
-    "Failed to fetch categories",
-    initialPage
+  } = useDataTable(getCategoryCOA, "coa-categories", initialPage, initialLimit);
+
+  const handleSetPage = useCallback(
+    (newPage: number) => {
+      setPage(newPage);
+    },
+    [setPage]
   );
 
   useEffect(() => {
-    navigate({ search: { page }, replace: true });
-  }, [page, navigate]);
+    navigate({ search: { page, limit }, replace: true });
+  }, [page, limit, navigate]);
 
   const table = useReactTable({
     data,
@@ -87,28 +80,28 @@ function RouteComponent() {
     rowCount: pageInfo?.total ?? 0,
   });
 
-  if (error && data.length === 0) {
-    return (
-      <div className="p-6 text-center text-red-500">
-        Error: {(error as Error).message}
-      </div>
-    );
-  }
-
   return (
     <div className="p-4 space-y-4">
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center gap-4">
         <h1 className="text-2xl font-bold">Category COA</h1>
-        <Input
-          placeholder="Cari berdasarkan nama..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="max-w-sm"
-        />
+        <div className="flex gap-2 items-center">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Cari berdasarkan nama..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 max-w-sm"
+            />
+          </div>
+          <Button>
+            <PlusCircle className="mr-2 h-4 w-4" /> Tambah Kategori
+          </Button>
+        </div>
       </div>
 
       {loading && data.length === 0 ? (
-        <Loader />
+        <TableSkeleton columns={columns} rowCount={limit} />
       ) : (
         <>
           <div className="border rounded-md">
@@ -157,26 +150,16 @@ function RouteComponent() {
 
           <div className="flex items-center justify-between">
             <div className="text-sm text-muted-foreground">
-              Halaman {page} dari {pageInfo?.totalPage ?? 1}
+              Menampilkan {data.length} dari {pageInfo?.total ?? 0} data.
             </div>
-            <div className="flex items-center space-x-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setPage(page - 1)}
-                disabled={page <= 1}
-              >
-                Sebelumnya
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setPage(page + 1)}
-                disabled={page >= (pageInfo?.totalPage ?? 1)}
-              >
-                Berikutnya
-              </Button>
-            </div>
+            {pageInfo && pageInfo.totalPage > 1 && (
+              <DataTablePagination
+                page={page}
+                totalPage={pageInfo.totalPage}
+                setPage={handleSetPage}
+                isFetching={isFetching}
+              />
+            )}
           </div>
         </>
       )}

@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { toast } from "sonner";
+import { useState, useEffect } from "react";
 import { useDebounce } from "@/hooks/use-debounce";
 import type { ApiResponse } from "@/types/types";
 import { useQuery } from "@tanstack/react-query";
@@ -7,59 +6,53 @@ import { useQuery } from "@tanstack/react-query";
 type Fetcher<T> = (params: {
   page: number;
   q: string;
+  limit: number;
 }) => Promise<ApiResponse<T[]>>;
 
 export const useDataTable = <TData,>(
   fetcher: Fetcher<TData>,
   queryKey: string,
-  defaultErrorMessage: string,
-  initialPage: number
+  initialPage: number,
+  initialLimit: number = 10
 ) => {
   const [page, setPage] = useState(initialPage);
   const [searchTerm, setSearchTerm] = useState("");
+  const [limit, setLimit] = useState(initialLimit);
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
+
+  useEffect(() => {
+    if (debouncedSearchTerm) {
+      setPage(1);
+    }
+  }, [debouncedSearchTerm]);
 
   const {
     data: response,
-    isLoading: loading,
-    error,
+    isLoading,
+    isFetching,
   } = useQuery({
-    queryKey: [queryKey, { page, q: debouncedSearchTerm }],
-    queryFn: async () => {
-      try {
-        const currentPage = debouncedSearchTerm !== "" && page !== 1 ? 1 : page;
-        if (debouncedSearchTerm !== "" && page !== 1) {
-          setPage(1);
-        }
-
-        const result = await fetcher({
-          page: currentPage,
-          q: debouncedSearchTerm,
-        });
-        if (result.code !== 0) {
-          toast.error(result.message);
-          throw new Error(result.message);
-        }
-        return result;
-      } catch (err: any) {
-        const errorMessage = err.response?.data?.message || defaultErrorMessage;
-        toast.error(errorMessage);
-        throw new Error(errorMessage);
-      }
-    },
+    queryKey: [queryKey, { page, q: debouncedSearchTerm, limit }],
+    queryFn: () =>
+      fetcher({
+        page,
+        q: debouncedSearchTerm,
+        limit,
+      }),
     placeholderData: (previousData) => previousData,
   });
 
-  const data = response?.data ?? [];
-  const pageInfo = response?.pageInfo ?? null;
+  const data = response?.code === 0 ? response.data : [];
+  const pageInfo = response?.code === 0 ? response.pageInfo : null;
 
   return {
     data,
     pageInfo,
-    loading,
-    error,
+    loading: isLoading,
+    isFetching,
     page,
     setPage,
+    limit,
+    setLimit,
     searchTerm,
     setSearchTerm,
   };
