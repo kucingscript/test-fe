@@ -13,6 +13,7 @@ import { Route as AdminRouteRouteImport } from './routes/admin/route'
 import { Route as AuthRouteRouteImport } from './routes/_auth/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as AdminCoaCategoriesRouteImport } from './routes/admin/coa-categories'
 import { Route as AuthRegisterRouteImport } from './routes/_auth/register'
 import { Route as AuthLoginRouteImport } from './routes/_auth/login'
 
@@ -35,6 +36,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminRouteRoute,
 } as any)
+const AdminCoaCategoriesRoute = AdminCoaCategoriesRouteImport.update({
+  id: '/coa-categories',
+  path: '/coa-categories',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
 const AuthRegisterRoute = AuthRegisterRouteImport.update({
   id: '/register',
   path: '/register',
@@ -51,12 +57,14 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteRouteWithChildren
   '/login': typeof AuthLoginRoute
   '/register': typeof AuthRegisterRoute
+  '/admin/coa-categories': typeof AdminCoaCategoriesRoute
   '/admin/': typeof AdminIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof AuthLoginRoute
   '/register': typeof AuthRegisterRoute
+  '/admin/coa-categories': typeof AdminCoaCategoriesRoute
   '/admin': typeof AdminIndexRoute
 }
 export interface FileRoutesById {
@@ -66,13 +74,20 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteRouteWithChildren
   '/_auth/login': typeof AuthLoginRoute
   '/_auth/register': typeof AuthRegisterRoute
+  '/admin/coa-categories': typeof AdminCoaCategoriesRoute
   '/admin/': typeof AdminIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/admin' | '/login' | '/register' | '/admin/'
+  fullPaths:
+    | '/'
+    | '/admin'
+    | '/login'
+    | '/register'
+    | '/admin/coa-categories'
+    | '/admin/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/register' | '/admin'
+  to: '/' | '/login' | '/register' | '/admin/coa-categories' | '/admin'
   id:
     | '__root__'
     | '/'
@@ -80,6 +95,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/_auth/login'
     | '/_auth/register'
+    | '/admin/coa-categories'
     | '/admin/'
   fileRoutesById: FileRoutesById
 }
@@ -119,6 +135,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRouteRoute
     }
+    '/admin/coa-categories': {
+      id: '/admin/coa-categories'
+      path: '/coa-categories'
+      fullPath: '/admin/coa-categories'
+      preLoaderRoute: typeof AdminCoaCategoriesRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
     '/_auth/register': {
       id: '/_auth/register'
       path: '/register'
@@ -151,10 +174,12 @@ const AuthRouteRouteWithChildren = AuthRouteRoute._addFileChildren(
 )
 
 interface AdminRouteRouteChildren {
+  AdminCoaCategoriesRoute: typeof AdminCoaCategoriesRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
 const AdminRouteRouteChildren: AdminRouteRouteChildren = {
+  AdminCoaCategoriesRoute: AdminCoaCategoriesRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
 

@@ -9,6 +9,12 @@ export interface ApiResponse<T> {
   data: T;
 }
 
+export interface PageInfo {
+  page: number;
+  total: number;
+  totalPage: number;
+}
+
 export interface CorporateType {
   name: string;
 }
