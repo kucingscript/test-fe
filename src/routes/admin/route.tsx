@@ -24,7 +24,7 @@ export const Route = createFileRoute("/admin")({
   component: RouteComponent,
 });
 
-async function RouteComponent() {
+function RouteComponent() {
   const defaultOpen = Cookies.get("sidebar_state") === "true";
 
   return (

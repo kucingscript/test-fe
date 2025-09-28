@@ -5,12 +5,11 @@ import {
   useSearch,
 } from "@tanstack/react-router";
 import {
-  createColumnHelper,
   flexRender,
   getCoreRowModel,
   useReactTable,
+  type ColumnDef,
 } from "@tanstack/react-table";
-import { useQuery } from "@tanstack/react-query";
 import { getCategoryCOA } from "@/services/coaService";
 import { Input } from "@/components/ui/input";
 import {
@@ -21,172 +20,166 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
+import { useDataTable } from "@/hooks/use-data-table";
+import Loader from "@/components/Loader";
+import { useEffect } from "react";
 
 export const Route = createFileRoute("/admin/coa-categories")({
-  validateSearch: (search: Record<string, unknown>) => {
-    return {
-      page: Number(search.page ?? 1),
-      q: String(search.q ?? ""),
-    };
-  },
+  validateSearch: (search: Record<string, unknown>) => ({
+    page: Number(search.page ?? 1),
+  }),
   component: RouteComponent,
 });
 
-const columnHelper = createColumnHelper<CategoryCOA>();
-const columns = [
-  columnHelper.accessor("category_id", {
+const columns: ColumnDef<CategoryCOA>[] = [
+  {
+    accessorKey: "category_id",
     header: "ID Kategori",
-    cell: (info) => info.getValue(),
-  }),
-  columnHelper.accessor("name", {
+  },
+  {
+    accessorKey: "name",
     header: "Nama",
-    cell: (info) => info.getValue(),
-  }),
-  columnHelper.accessor("account_type", {
+  },
+  {
+    accessorKey: "account_type",
     header: "Tipe Akun",
-    cell: (info) => info.getValue(),
-  }),
-  columnHelper.accessor("normal_balance", {
+  },
+  {
+    accessorKey: "normal_balance",
     header: "Saldo Normal",
-    cell: (info) => info.getValue(),
-  }),
-  columnHelper.accessor("report_position", {
+  },
+  {
+    accessorKey: "report_position",
     header: "Posisi Laporan",
-    cell: (info) => info.getValue(),
-  }),
+  },
 ];
 
 function RouteComponent() {
   const navigate = useNavigate({ from: Route.fullPath });
-  const { page, q } = useSearch({ from: Route.fullPath });
+  const { page: initialPage } = useSearch({ from: Route.fullPath });
 
-  const { data, isLoading } = useQuery({
-    queryKey: ["coa-categories", { page, q }],
-    queryFn: () => getCategoryCOA({ page, q, limit: 10 }),
-    keepPreviousData: true,
-  });
+  const {
+    data,
+    pageInfo,
+    loading,
+    error,
+    page,
+    setPage,
+    searchTerm,
+    setSearchTerm,
+  } = useDataTable(
+    getCategoryCOA,
+    "coa-categories",
+    "Failed to fetch categories",
+    initialPage
+  );
+
+  useEffect(() => {
+    navigate({ search: { page }, replace: true });
+  }, [page, navigate]);
 
   const table = useReactTable({
-    data: data?.data ?? [],
+    data,
     columns,
     getCoreRowModel: getCoreRowModel(),
     manualPagination: true,
-    rowCount: data?.pageInfo.total ?? 0,
-    state: {
-      pagination: {
-        pageIndex: page - 1,
-        pageSize: 10,
-      },
-    },
+    rowCount: pageInfo?.total ?? 0,
   });
 
-  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const newSearch = event.target.value;
-    navigate({
-      search: (prev) => ({ ...prev, q: newSearch, page: 1 }),
-      replace: true,
-    });
-  };
+  if (error && data.length === 0) {
+    return (
+      <div className="p-6 text-center text-red-500">
+        Error: {(error as Error).message}
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 space-y-4">
-      <h1 className="text-2xl font-bold">Category COA</h1>
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold">Category COA</h1>
+        <Input
+          placeholder="Cari berdasarkan nama..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="max-w-sm"
+        />
+      </div>
 
-      <Input
-        placeholder="Cari berdasarkan nama..."
-        value={q}
-        onChange={handleSearch}
-        className="max-w-sm"
-      />
-
-      <div className="border rounded-md">
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
+      {loading && data.length === 0 ? (
+        <Loader />
+      ) : (
+        <>
+          <div className="border rounded-md">
+            <Table>
+              <TableHeader>
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <TableRow key={headerGroup.id}>
+                    {headerGroup.headers.map((header) => (
+                      <TableHead key={header.id}>
+                        {flexRender(
                           header.column.columnDef.header,
                           header.getContext()
                         )}
-                  </TableHead>
+                      </TableHead>
+                    ))}
+                  </TableRow>
                 ))}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {isLoading ? (
-              Array.from({ length: 5 }).map((_, i) => (
-                <TableRow key={i}>
-                  {columns.map((_, j) => (
-                    <TableCell key={j}>
-                      <Skeleton className="w-full h-5" />
+              </TableHeader>
+              <TableBody>
+                {table.getRowModel().rows.length > 0 ? (
+                  table.getRowModel().rows.map((row) => (
+                    <TableRow key={row.id}>
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell key={cell.id}>
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell
+                      colSpan={columns.length}
+                      className="h-24 text-center"
+                    >
+                      Tidak ada data yang ditemukan.
                     </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            ) : table.getRowModel().rows.length > 0 ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  No results.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
 
-      <div className="flex items-center justify-between">
-        <div className="text-sm text-muted-foreground">
-          Halaman {page} dari {data?.pageInfo.totalPage ?? 1}
-        </div>
-        <div className="flex items-center space-x-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() =>
-              navigate({ search: (prev) => ({ ...prev, page: page - 1 }) })
-            }
-            disabled={page <= 1}
-          >
-            Sebelumnya
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() =>
-              navigate({ search: (prev) => ({ ...prev, page: page + 1 }) })
-            }
-            disabled={page >= (data?.pageInfo.totalPage ?? 1)}
-          >
-            Berikutnya
-          </Button>
-        </div>
-      </div>
+          <div className="flex items-center justify-between">
+            <div className="text-sm text-muted-foreground">
+              Halaman {page} dari {pageInfo?.totalPage ?? 1}
+            </div>
+            <div className="flex items-center space-x-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage(page - 1)}
+                disabled={page <= 1}
+              >
+                Sebelumnya
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage(page + 1)}
+                disabled={page >= (pageInfo?.totalPage ?? 1)}
+              >
+                Berikutnya
+              </Button>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

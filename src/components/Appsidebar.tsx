@@ -53,8 +53,8 @@ const items = [
     icon: Home,
   },
   {
-    title: "Inbox",
-    url: "#",
+    title: "COA Categories",
+    url: "/admin/coa-categories",
     icon: Inbox,
   },
   {

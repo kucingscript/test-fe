@@ -2,17 +2,18 @@ export interface JwtPayload {
   exp: number;
 }
 
+export interface PageInfo {
+  page: number;
+  total: number;
+  totalPage: number;
+}
+
 export interface ApiResponse<T> {
   code: number;
   request_id: string;
   message: string;
   data: T;
-}
-
-export interface PageInfo {
-  page: number;
-  total: number;
-  totalPage: number;
+  pageInfo?: PageInfo;
 }
 
 export interface CorporateType {
