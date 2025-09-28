@@ -16,13 +16,9 @@ function AdminDashboard() {
   };
 
   return (
-    <div className="p-4">
+    <div>
       <h1 className="text-2xl font-bold">Welcome, {user?.nickname}!</h1>
       <p>This is a protected admin page.</p>
-      <div className="mt-4 p-4 border rounded bg-gray-50">
-        <h2 className="font-semibold">User Details:</h2>
-        <pre>{JSON.stringify(user, null, 2)}</pre>
-      </div>
       <Button onClick={handleLogout} className="mt-6">
         Logout
       </Button>
