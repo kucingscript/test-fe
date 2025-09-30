@@ -2,9 +2,10 @@ import { Loader2 } from "lucide-react";
 
 const Loader = () => {
   return (
-    <div className="flex justify-center items-center py-10">
-      <Loader2 className="h-8 w-8 animate-spin text-primary" />
-    </div>
+    <>
+      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+      Loading...
+    </>
   );
 };
 

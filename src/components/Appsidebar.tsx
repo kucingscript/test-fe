@@ -42,7 +42,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "./ui/collapsible";
-import { useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Link } from "@tanstack/react-router";
 
@@ -251,4 +251,4 @@ const AppSidebar = () => {
   );
 };
 
-export default AppSidebar;
+export default memo(AppSidebar);

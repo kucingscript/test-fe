@@ -24,7 +24,7 @@ import { Button } from "@/components/ui/button";
 import { useDataTable } from "@/hooks/use-data-table";
 import { useCallback, useEffect } from "react";
 import { PlusCircle, Search } from "lucide-react";
-import { DataTablePagination } from "@/components/pagination";
+import DataTablePagination from "@/components/Pagination";
 import { TableSkeleton } from "@/components/TableSkeleton";
 
 export const Route = createFileRoute("/admin/coa-categories")({
@@ -54,6 +54,7 @@ function RouteComponent() {
     pageInfo,
     loading,
     isFetching,
+    isError,
     page,
     setPage,
     limit,
@@ -121,7 +122,16 @@ function RouteComponent() {
                 ))}
               </TableHeader>
               <TableBody>
-                {table.getRowModel().rows.length > 0 ? (
+                {isError ? (
+                  <TableRow>
+                    <TableCell
+                      colSpan={columns.length}
+                      className="h-24 text-center text-red-500"
+                    >
+                      Gagal memuat data. Server mungkin sedang tidak aktif.
+                    </TableCell>
+                  </TableRow>
+                ) : table.getRowModel().rows.length > 0 ? (
                   table.getRowModel().rows.map((row) => (
                     <TableRow key={row.id}>
                       {row.getVisibleCells().map((cell) => (

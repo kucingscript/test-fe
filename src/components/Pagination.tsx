@@ -14,7 +14,7 @@ interface DataTablePaginationProps {
   isFetching?: boolean;
 }
 
-const PaginationComponent = ({
+const DataTablePagination = ({
   page,
   totalPage,
   setPage,
@@ -65,4 +65,4 @@ const PaginationComponent = ({
   );
 };
 
-export const DataTablePagination = memo(PaginationComponent);
+export default memo(DataTablePagination);

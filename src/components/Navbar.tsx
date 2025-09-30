@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { useTheme } from "./theme-provider";
 import { SidebarTrigger } from "./ui/sidebar";
 import { Link } from "@tanstack/react-router";
+import { memo } from "react";
 
 const Navbar = () => {
   const { theme, setTheme } = useTheme();
@@ -73,4 +74,4 @@ const Navbar = () => {
   );
 };
 
-export default Navbar;
+export default memo(Navbar);

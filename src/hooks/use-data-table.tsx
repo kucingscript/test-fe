@@ -30,15 +30,31 @@ export const useDataTable = <TData,>(
     data: response,
     isLoading,
     isFetching,
+    isError,
   } = useQuery({
     queryKey: [queryKey, { page, q: debouncedSearchTerm, limit }],
-    queryFn: () =>
-      fetcher({
-        page,
-        q: debouncedSearchTerm,
-        limit,
-      }),
+    queryFn: async () => {
+      try {
+        return await fetcher({
+          page,
+          q: debouncedSearchTerm,
+          limit,
+        });
+      } catch (error: any) {
+        if (error.response && error.response.status === 500) {
+          return {
+            code: 500,
+            request_id: "",
+            message: "Internal Server Error",
+            data: [],
+            pageInfo: null,
+          };
+        }
+        throw error;
+      }
+    },
     placeholderData: (previousData) => previousData,
+    retry: false,
   });
 
   const data = response?.code === 0 ? response.data : [];
@@ -49,6 +65,7 @@ export const useDataTable = <TData,>(
     pageInfo,
     loading: isLoading,
     isFetching,
+    isError,
     page,
     setPage,
     limit,
