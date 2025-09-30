@@ -58,7 +58,7 @@ export const useDataTable = <TData,>(
   });
 
   const data = response?.code === 0 ? response.data : [];
-  const pageInfo = response?.code === 0 ? response.pageInfo : null;
+  const pageInfo = response?.pageInfo ?? null;
 
   return {
     data,

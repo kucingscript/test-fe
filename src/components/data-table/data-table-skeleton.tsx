@@ -9,15 +9,15 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-interface TableSkeletonProps<TData> {
-  columns: ColumnDef<TData>[];
+interface TableSkeletonProps<TData, TValue> {
+  columns: ColumnDef<TData, TValue>[];
   rowCount?: number;
 }
 
-export function TableSkeleton<TData>({
+export function TableSkeleton<TData, TValue>({
   columns,
   rowCount = 10,
-}: TableSkeletonProps<TData>) {
+}: TableSkeletonProps<TData, TValue>) {
   return (
     <div className="border rounded-md">
       <Table>
